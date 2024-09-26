@@ -1,8 +1,0 @@
-There should be 7 script files in this folder:
-01_run_blastn_simple.sh
-01A_run_prep_for_blast.sh
-01B_run_blastn_array.sh
-02_run_taxonomizr_lca.sh
-02_taxonomizr_lca.R
-03_run_make_summary_files.sh
-03_make_summary_files.R
