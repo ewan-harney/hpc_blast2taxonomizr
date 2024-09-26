@@ -11,7 +11,7 @@ The workflow was designed for eukaryotic taxonomic assignment. It is an alternat
 For metabarcoding projects featuring non-microbial eukaryotic data, using blastn to query sequences against ncbi databases provides a reliable means of taxonomic identification. However, the ncbi database will probably contain multiple sequences that match the query sequence, making it hard to tell which taxa the query sequence belongs to. THE LCA (lowest common ancestor) algorthm assigns taxonomy based on the lowest common taxonomic ancestor shared by the different taxonomic groups identified by BLAST. 
 <br></br>
 
-This pipeline was originally designed to work with the MEGAN lowest common ancestor (LCA) algorithm (pipeline still available at the [hpc_blast2megan](https://github.com/ewan-harney/hpc_blast2megan) repository). Unfortunately the taxonomy database for MEGAN hasn't been updated since February 2022 (this was true as of September 2024), which can lead to missing results. The R package [taxonomizr](https://github.com/sherrillmix/taxonomizr) provides a useful alternative because it incorporates a function to download the latest taxonomy data from ncbi. We run that function every month, maintaining an up-to-date version of the database on Bessemer. The blast2taxonomizr pipeline then uses the `condenseTaxa()` function of taxonomizr to provide LCA information.
+This pipeline was originally designed to work with the MEGAN lowest common ancestor (LCA) algorithm (pipeline still available at the [hpc_blast2megan](https://github.com/ewan-harney/hpc_blast2megan) repository). Unfortunately the taxonomy database for MEGAN hasn't been updated since February 2022 (this was true as of September 2024), which can lead to missing results. The R package [taxonomizr](https://github.com/sherrillmix/taxonomizr) provides a useful alternative because it incorporates a function to download the latest taxonomy data from ncbi. We run that function every month, maintaining an up-to-date version of the database on BESSEMER. The blast2taxonomizr pipeline then uses the `condenseTaxa()` function of taxonomizr to provide LCA information.
 <br></br>
 
 Although designed to follow the dada2 pipeline, this workflow can be applied to query any nucleotide sequence data in fasta format. The code has been written for use with the University of Sheffield's [BESSEMER](https://docs.hpc.shef.ac.uk/en/latest/bessemer/index.html) system but should be applicable to any GNU/Linux based HPC system once the appropriate modifications are made (your mileage may vary).
@@ -25,7 +25,7 @@ I am code - you must run me
 
 When we refer to programs, functions, filepaths, directory names, and file names within normal text we use inline code, like this:
 
-Running `blastn` will create the `all_blast.out.tab` file within the `blast_out` directory
+* Running `blastn` will create the `all_blast.out.tab` file within the `blast_out` directory
 <br></br>
 
 When a specific button should be pressed this is shown in double quotes, like so:
@@ -68,7 +68,7 @@ ls b2t_scripts
 
 <font size="4"><b>2.4) A note on editing scripts</b></font>
 <br></br>
-Unlike the scripts in the dada2 pipeline, the 01 blast scripts (01, 01A, 01B) do not require an email address as a command line argument. By default the user will not receive email confirmation of job completion; however, this can be easily altered through a small change to the resource request section at the top of the .sh scripts. A script can be viewed and edited with the `nano` command and the relative or absolute path to the script, e.g. :
+Unlike the scripts in the dada2 pipeline, or the 02 and 03 scripts in this pipeline, the 01 blast scripts (01, 01A, 01B) do not require an email address as a command line argument. By default the user will not receive email confirmation of job completion; however, this can be easily altered through a small change to the resource request section at the top of the .sh scripts. A script can be viewed and edited with the `nano` command and the relative or absolute path to the script, e.g. :
 
 ```
 nano b2t_scripts/01_run_blastn_simple.sh
@@ -115,7 +115,7 @@ Running `blastn` in simple mode will create a new directory called `blast_out` i
 * the location of an ncbi database on the HPC (-B)
 <br></br>
 
-It is most likely that you will use the nt database, which contains all nucleotide sequences available on GenBank. However, you can also supply a smaller or bespoke indexed database. Here we assume you are using nt. This is an example of how to submit the job on Bessemer:
+It is most likely that you will use the nt database, which contains all nucleotide sequences available on GenBank. However, you can also supply a smaller or bespoke indexed database. Here we assume you are using nt. This is an example of how to submit the job on BESSEMER:
   
 ```
 sbatch b2t_scripts/01_run_blastn_simple.sh -F working_data/06_ASV_seqs.fasta -B /shared/genomicsdb2/shared/ncbi_nt/current/nt
@@ -154,7 +154,7 @@ As stated in section 3.2, it is most likely that you will use the database nt. T
 ls split_fasta/split_fasta*
 ```
   
-Slurm job arrays allow batch jobs to be broken down into parts and run in parallel, saving time for the user. However, the script and it's submission to Bessemer are somewhat different to normal sbatch jobs. For more information on arrays refer to the Sheffield HPC documentation on [advanced job submission](https://docs.hpc.shef.ac.uk/en/latest/hpc/scheduler/advanced_job_submission_and_control.html#gsc.tab=0). 
+Slurm job arrays allow batch jobs to be broken down into parts and run in parallel, saving time for the user. However, the script and it's submission to BESSEMER are somewhat different to normal sbatch jobs. For more information on arrays refer to the Sheffield HPC documentation on [advanced job submission](https://docs.hpc.shef.ac.uk/en/latest/hpc/scheduler/advanced_job_submission_and_control.html#gsc.tab=0). 
 <br></br>
 
 If our original sequence.fasta file contained 2350 sequuences, it would have been split into 24 chunks, with the txt file named `split_fasta_list_of_24.txt`. This number, <b>24</b>, would appear twice when we submit this job; as the array limit and as the value of -N. For example:
@@ -245,7 +245,6 @@ Thus you might run the job like so:
 ```
 sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 95 -T 2 -B /shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql -E user@university.ac.uk
 ```
-<br>
 </details>
 <br>
 
