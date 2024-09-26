@@ -204,7 +204,7 @@ All the rows displayed by head (the top 10) probably show results for the same s
 <details><summary><font size="6"><b>4) Run the taxonomizr LCA algorithm</font></b></summary>
 <br></br>
 
-For this step we will use [taxonomizr](https://github.com/sherrillmix/taxonomizr), an R package designed parse NCBI taxonomy files and help with taxonomy assignment. The `condenceTaxa()` function calculates the lowest common ancestor or [LCA](https://en.wikipedia.org/wiki/Lowest_common_ancestor) using multiple blast results.
+For this step we will use [taxonomizr](https://github.com/sherrillmix/taxonomizr), an R package designed to parse NCBI taxonomy files and help with taxonomy assignment. The `condenceTaxa()` function calculates the lowest common ancestor or [LCA](https://en.wikipedia.org/wiki/Lowest_common_ancestor) using multiple blast results.
 <br></br>
 
 The `02_run_taxonomizr_lca.sh` script takes the output from `blast_out`, and does the following:
