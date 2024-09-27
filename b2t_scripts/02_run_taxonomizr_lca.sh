@@ -65,7 +65,6 @@ fi
 
 ## Step 2: Remove additional taxa information and filter by user specified blast percentage identity (BPI)
 cut -f1-12 ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab | awk -v var="${BPI}" '$3 >= var' > ${MAIN_DIR}/${OUT_DIR}/filtered_blast.out.tab
-#grep -v 'uncultured' ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab | cut -f1-12 | awk -v var="${BPI}" '$3 >= var' > ${MAIN_DIR}/${OUT_DIR}/filtered_blast.out.tab
 
 ## Make a symlink for the most recent version of the accessionTaxa.sql database for taxonomizr to use:
 ln -s ${database} accessionTaxa.sql
