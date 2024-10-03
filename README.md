@@ -157,7 +157,7 @@ As stated in section 3.2, it is most likely that you will use the ncbi database 
 ls split_fasta/split_fasta*
 ```
   
-<b>IMPORTANT!</b> Check carefully the number that appears in this file name! This is the number that <b>MUST</b> be used when running `01B_run_blastn_array.sh`. For example, </>if</b> our original sequence.fasta file had contained 2350 sequences, it would have been split into 24 chunks, with the txt file named `split_fasta_list_of_24.txt`. The number (in this example <b>24</b>) should appear twice when we submit this job; as the array limit (following `sbatch --array=1-` ) and as the value of `-N`. For example:
+<b>IMPORTANT!</b> Check carefully the number that appears in this file name! This is the number that <b>MUST</b> be used when running `01B_run_blastn_array.sh`. For example, if our original sequence.fasta file had contained 2350 sequences, it would have been split into 24 chunks, with the txt file named `split_fasta_list_of_24.txt`. The number (in this example <b>24</b>) should appear twice when we submit this job; as the array limit (following `sbatch --array=1-` ) and as the value of `-N`. For example:
   
 ```
 sbatch --array=1-24 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 24
