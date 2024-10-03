@@ -124,10 +124,13 @@ sbatch b2t_scripts/01_run_blastn_simple.sh -F working_data/06_ASV_seqs.fasta -B 
 <font size="4"><b>3.3) Running blastn in array mode</b></font>
 <br></br>
 
+Slurm job arrays allow batch jobs to be broken down into parts and run in parallel, saving time for the user. Submitting these scripts is somewhat different to submitting normal sbatch jobs. For more information on arrays refer to the Sheffield HPC documentation on [advanced job submission](https://docs.hpc.shef.ac.uk/en/latest/hpc/scheduler/advanced_job_submission_and_control.html#gsc.tab=0). 
+<br></br>
+
 Running `blastn` in array mode requires running 2 scripts one after the other: `01A_run_split_fasta.sh` then `01B_run_blastn_array.sh`.
 <br></br>
 
-The `01A_run_prep_for_blast.sh` splits the input fasta file into chunks each containing 100 sequences which are written to a new directory called `split_fasta` (files will be named `chunk0.fa`,`chunk100.fa` etc). It also creates symbolic links to the ncbi taxadb files `taxdb.btd` and `taxdb.bti`, and makes a directory called `blast_logs`; all of these will be used in the following script. Finally it creates a text file called `split_fasta_list_of_X.txt` with the names of all the chunk.fa files to be used in script 01B. In your file the 'X' will be the total number of chunk.fa files and is an important parameter for `01B_run_blastn_array.sh`.
+The `01A_run_prep_for_blast.sh` splits the input fasta file into chunks each containing 100 sequences which are written to a new directory called `split_fasta` (files will be named `chunk0.fa`,`chunk100.fa` etc). It also creates symbolic links to the ncbi taxadb files `taxdb.btd` and `taxdb.bti`, and makes a directory called `blast_logs`; all of these will be used in the following script. Finally it creates a text file called `split_fasta_list_of_X.txt` with the names of all the chunk.fa files to be used in script 01B. In your file the 'X' will be the total number of chunk.fa files and is an important parameter to set in the `01B_run_blastn_array.sh` script.
 <br></br>
 
 <b>To run `01A_run_prep_for_blast.sh` you need to provide:</b>
@@ -148,22 +151,25 @@ The `01B_run_blastn_array.sh` script will then use an array to simultaneously bl
 * the number of input files to be run on the array (-N)
 <br></br>
 
-As stated in section 3.2, it is most likely that you will use the database nt. The number -N is contained in the file name of `split_fasta_list_of_X.txt` (in place of the 'X'). This can be viewed with the following command:
+As stated in section 3.2, it is most likely that you will use the ncbi database nt. The number -N is contained in the file name of `split_fasta_list_of_X.txt` (in place of the 'X'). This can be viewed with the following command:
   
 ```
 ls split_fasta/split_fasta*
 ```
   
-Slurm job arrays allow batch jobs to be broken down into parts and run in parallel, saving time for the user. However, the script and it's submission to BESSEMER are somewhat different to normal sbatch jobs. For more information on arrays refer to the Sheffield HPC documentation on [advanced job submission](https://docs.hpc.shef.ac.uk/en/latest/hpc/scheduler/advanced_job_submission_and_control.html#gsc.tab=0). 
-<br></br>
-
-If our original sequence.fasta file contained 2350 sequuences, it would have been split into 24 chunks, with the txt file named `split_fasta_list_of_24.txt`. This number, <b>24</b>, would appear twice when we submit this job; as the array limit and as the value of -N. For example:
+<b>IMPORTANT!</b> Check carefully the number that appears in this file name! This is the number that <b>MUST</b> be used when running `01B_run_blastn_array.sh`. For example, </>if</b> our original sequence.fasta file had contained 2350 sequences, it would have been split into 24 chunks, with the txt file named `split_fasta_list_of_24.txt`. The number (in this example <b>24</b>) should appear twice when we submit this job; as the array limit (following `sbatch --array=1-` ) and as the value of `-N`. For example:
   
 ```
 sbatch --array=1-24 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 24
 ```
   
-Notice that `sbatch` is followed by ` --array=1-` and then the number specific to our data set. This number also appears at the end of the command following the -N flag. Error and output log files for each job of the array will be written to the directory `blast_logs`.
+<b>On the other hand</b> if our original sequence.fasta file had only contained 1780 sequences, it would have been split into 18 chunks, with the txt file named `split_fasta_list_of_18.txt`. In this case our `array` and `-N` value would be set to <b>18</b> and we would run the script like so:
+  
+```
+sbatch --array=1-18 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 18
+```
+  
+Note that error and output log files for each subjob of the array will be written to the directory `blast_logs`.
 <br></br>
 
 <font size="4"><b>3.4) Monitoring and assessing the result of blastn</b></font>
