@@ -31,7 +31,7 @@ sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 90 -T 2 -B /shared/genomicsdb2/sh
 
 ## load profile and environment
 source ~/.bash_profile
-mamba activate taxonomizr
+conda activate /usr/local/extras/Genomics/apps/mambaforge/envs/taxonomizr
 
 ## parse arguments
 while getopts E:B:P:T: flag
