@@ -241,7 +241,7 @@ We also provide a 'Top Percent' value (-T) to further adjust sensitivity. This f
 Top Percent can be set to anything from 0 to 100, but values of 1-10 are most appropriate. Setting Top Percent to a low value (1.5, 2) will retain fewer blast hits and probably result in better taxonomic assignment. However if the ASVs derive from organisms with poor representation in the reference database then it may be better to set Top Percent higher (5-10). The idea for the Top Percent filter is taken from MEGAN: for more information see the [MEGAN manual](https://software-ab.cs.uni-tuebingen.de/download/megan6/manual.pdf).
 <br></br>
 
-If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database should be available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql`. You can also download your own version (but the file is rather large). For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr). For deciding which values of -P and -T to use, we recommend initially using relatively strict (high) values for both, such as:
+If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database should be available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql`. You can also generate your own version using R (note that the file is rather large). For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr). For deciding which values of -P and -T to use, we recommend initially using relatively strict (high) values for both, such as:
 * -P 95
 * -T 2
 <br></br>
