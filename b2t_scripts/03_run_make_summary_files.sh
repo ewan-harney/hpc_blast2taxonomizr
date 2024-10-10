@@ -9,7 +9,7 @@
 #SBATCH -A molecolb
 #SBATCH -p molecolb
 #SBATCH --mem-per-cpu=4GB
-#SBATCH --time=6:00:00
+#SBATCH --time=72:00:00
 #SBATCH --mail-type=END
 
 ## load profile. Conda environment required to run Rscript command
