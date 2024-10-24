@@ -231,6 +231,7 @@ This script carries out some preparation on the command line and then calls an R
 * Full path to the taxonomizr accessionTaxa.sql database (-B)
 * An email address (-E)
 <br></br>
+
 <b>Additionally, there is an optional argument to exclude hits based on a search term:</b>
 * Search term enclosed within single quotes, e.g. 'uncultured' (-G)
 <br></br>
