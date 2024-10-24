@@ -231,6 +231,12 @@ This script carries out some preparation on the command line and then calls an R
 * Full path to the taxonomizr accessionTaxa.sql database (-B)
 * An email address (-E)
 <br></br>
+<b>Additionally, there is an optional argument to exclude hits based on a search term:</b>
+* Search term enclosed within single quotes, e.g. 'uncultured' (-G)
+<br></br>
+
+Taxonomic assignment may be improved by removing uncultured sequences (which rarely feature taxonomic information beyond domain). Note that this will only work if blast was run with the files 'taxdb.btd' and 'taxdb.bti' present, which include additional taxonomic information.
+<br></br>
 
 Blast will potentially output hundred of hits for each ASV. The minimum percentage identity threshold (-P) can be used to reduce the number of hits that are considered by taxonomizr. We suggest using a relatively high value to start with (90 or 95), which can be reduced if high numbers of NAs appear in the summary file.
 <br></br>
@@ -250,6 +256,10 @@ Thus you might run the job like so:
 
 ```
 sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 95 -T 2 -B /shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql -E user@university.ac.uk
+```
+If you wish to exclude hits containing 'uncultured in their name you would include the optional -G argument:
+```
+sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 95 -T 2 -G 'uncultured' -B /shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql -E user@university.ac.uk
 ```
 </details>
 <br>

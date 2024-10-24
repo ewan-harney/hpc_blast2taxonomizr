@@ -15,32 +15,34 @@ USAGE="
 ###############################################
 ## Using the 02_run_taxonomizr_lca.sh script ##
 ###############################################
-\n02_run_taxonomizr_lca.sh -P [blast percent ID value 0-100] -T [top percent value 1-10] -B [full path to accessionTaxa.sql file] -E [email address] \n
+\n02_run_taxonomizr_lca.sh -P [blast percent ID value 0-100] -T [top percent value 1-10] -G [optional: 'search term' to exclude] -B [full path to accessionTaxa.sql file] -E [email address] \n
 The script takes the output from blast (script 01 or script 01A and 01B) which are assumed to be in the directory blast_out, and applies the 
 following steps: \n
-Step 1: Merge results if blast was run in array mode (automatically detected).
-Step 2: Filter blast results by percentage ID (0-100). The user provides a minimum percentage ID (-P) for 
-        filtering blast results. We recommend 85-95.
-Step 3: The user can further adjust the sensitivity of the LCA algorithm by providing a top percent value
-        (-T) between 1 and 10 (decimals permitted). 
-Step 4: Run the taxonomizr lca (lowest common ancestor) algorithm; this requires the user to provide the 
-        full path to the accessionTaxa.sql database (-B). The output of taxonomizr will be saved to 
-        blast_out and also sent to the user's email address (-E).\n
+Step 1:   Merge results if blast was run in array mode (automatically detected).
+Step 1.5: Optionally remove blast hits containing a search term (e.g. 'uncultured')
+Step 2:   Filter blast results by percentage ID (0-100). The user provides a minimum percentage ID (-P) for 
+          filtering blast results. We recommend 85-95.
+Step 3:   The user can further adjust the sensitivity of the LCA algorithm by providing a top percent value
+          (-T) between 1 and 10 (decimals permitted). 
+Step 4:   Run the taxonomizr lca (lowest common ancestor) algorithm; this requires the user to provide the 
+          full path to the accessionTaxa.sql database (-B). The output of taxonomizr will be saved to 
+          blast_out and also sent to the user's email address (-E).\n
 Here is an example of how you might run the script on Bessemer:\n
-sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 90 -T 2 -B /shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql -E user@university.ac.uk \n\n\n"
+sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 95 -T 2 -G 'uncultured' -B /shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql -E user@university.ac.uk \n\n\n"
 
 ## load profile and environment
 source ~/.bash_profile
 conda activate /usr/local/extras/Genomics/apps/mambaforge/envs/taxonomizr
 
 ## parse arguments
-while getopts E:B:P:T: flag
+while getopts E:B:P:T:G: flag
 do
 	case "${flag}" in
 		E) email=${OPTARG};;
 		B) database=${OPTARG};;
 		P) BPI=${OPTARG};;
 		T) topperc=${OPTARG};;
+		G) grep=${OPTARG};;
 	esac
 done
 
@@ -62,6 +64,14 @@ if [ -f "${MAIN_DIR}/${OUT_DIR}/chunk0.fa_blast.out.tab" ]; then
   echo "Blast was run in array mode, merging chunks..."
   cat ${MAIN_DIR}/${OUT_DIR}/chunk* > ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab
 fi
+
+## Step 1.5 optionally remove blast hits containing a search term (e.g. 'uncultured')
+if [ "$grep" ];
+then
+mv ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab ${MAIN_DIR}/${OUT_DIR}/all_blast.out.TEMP.tab
+grep -v ${grep} ${MAIN_DIR}/${OUT_DIR}/all_blast.out.TEMP.tab > ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab;
+fi
+
 
 ## Step 2: Remove additional taxa information and filter by user specified blast percentage identity (BPI)
 cut -f1-12 ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab | awk -v var="${BPI}" '$3 >= var' > ${MAIN_DIR}/${OUT_DIR}/filtered_blast.out.tab
