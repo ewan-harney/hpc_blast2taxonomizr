@@ -68,8 +68,8 @@ fi
 ## Step 1.5 optionally remove blast hits containing a search term (e.g. 'uncultured')
 if [ "$grep" ];
 then
-mv ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab ${MAIN_DIR}/${OUT_DIR}/all_blast.out.TEMP.tab
-grep -v ${grep} ${MAIN_DIR}/${OUT_DIR}/all_blast.out.TEMP.tab > ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab;
+mv ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab ${MAIN_DIR}/${OUT_DIR}/all_blast.out.nogrepv.tab
+grep -v ${grep} ${MAIN_DIR}/${OUT_DIR}/all_blast.out.nogrepv.tab > ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab;
 fi
 
 
