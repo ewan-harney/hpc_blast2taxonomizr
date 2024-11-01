@@ -220,9 +220,9 @@ The `02_run_taxonomizr_lca.sh` script takes the output from `blast_out`, and doe
 <br></br>
 
 1. If blast was run in array mode, chunks are concatenated (automatically detected) to produce an `all_blast.out.tab` file.
-2. Blast results are filtered by percentage of identical positions, and optionally, alignment length. Hits containing key terms can also be filtered out optionally.
-3. The sensitivity of the LCA algorithm is adjusted with the top percent argument (see below).
-4. The output is saved as a taxon path file (all the taxonomic levels to the lowest common ancestor) and emailed to the user.
+2. Blast results are filtered according to user specified parameters.
+3. The sensitivity of the LCA algorithm is adjusted with the top percent argument.
+4. The output is saved as a taxon path file and emailed to the user.
 <br></br>
 
 <b>To run the `02_run_taxonomizr_lca.sh` script you must provide:</b>
@@ -238,11 +238,20 @@ The `02_run_taxonomizr_lca.sh` script takes the output from `blast_out`, and doe
 * (-O) Relative path of the results directory
 <br></br>
 
-If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database is available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql` and used by default. You can also generate your own database using R. For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr).
+Using default arguments and suggested parameter values you might run the job like so:
+```
+sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -T 2 -E user@university.ac.uk
+```
+If you wish to exclude 'uncultured eukaryote' hits, and those for which the alignment is less than 75 bp you might run the job like so:
+```
+sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -L 75 -T 2 -G 'uncultured eukaryote' -E user@university.ac.uk
+```
 
-As input, either `all_blast.out.tab` or `chunk0.fa_blast.out.tab` must be present, and are assumed to be in the `blast_out` directory. An alternative directory name can be provided, but it must still contain either `all_blast.out.tab` or `chunk0.fa_blast.out.tab`.
+If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database is available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql` and will be used by default. You can also generate your own database in R. For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr).
 
-Filtration of blast results produces an intermediate file called `filtered_blast.out.tab`, and once taxonomizr has been run, a final output file called `taxonomizr_taxon_path.tsv`. 
+As input, either `all_blast.out.tab` or `chunk0.fa_blast.out.tab` must be present, and are assumed to be in the `blast_out` directory. An alternative directory name can be provided, but it must still contain either one of the aforementioned files.
+
+Filtration of blast results produces an intermediate file called `filtered_blast.out.tab`, and once taxonomizr has been run, a final output file called `taxonomizr_taxon_path.tsv`, featuring assignments at each taxonomic level down to the lowest common ancestor for each ASV that passed filtration.
 <br></br>
 
 <font size="4"><b>4.2) Filtering blast results in 02_run_taxonomizr_lca.sh </b></font>
@@ -268,18 +277,6 @@ It is also mandatory to include a 'Top Percent' value (-T), which is incorporate
 
 Values of 1-10 are most appropriate for Top Percent. Low values (1.5, 2) will retain fewer blast hits and result in more specific taxonomic assignment. However if the ASVs derive from organisms with poor representation in the reference database, then higher Top Percent values (e.g. 5-10) may be appropriate. The idea for Top Percent is taken from MEGAN: for more information see the [MEGAN manual](https://software-ab.cs.uni-tuebingen.de/download/megan6/manual.pdf).
 <br></br>
-
-<font size="4"><b>4.4) Running the 02_run_taxonomizr_lca.sh script </b></font>
-<br><br>
-
-Using default arguments and suggested parameter values you might run the job like so:
-```
-sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -T 2 -E user@university.ac.uk
-```
-If you wish to exclude 'uncultured eukaryote' hits, and those which are less than 75% of your expected ASV size of 100 bp (i.e. 75 bp) you might run the job like so:
-```
-sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -L 75 -T 2 -G 'uncultured eukaryote' -E user@university.ac.uk
-```
 </details>
 <br>
 
