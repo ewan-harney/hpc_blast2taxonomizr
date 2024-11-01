@@ -216,13 +216,13 @@ All the rows displayed by head (the top 10) probably show results for the same s
 For this step we will use [taxonomizr](https://github.com/sherrillmix/taxonomizr), an R package designed to parse NCBI taxonomy files and help with taxonomy assignment. The `condenceTaxa()` function calculates the lowest common ancestor or [LCA](https://en.wikipedia.org/wiki/Lowest_common_ancestor) using multiple blast results.
 <br></br>
 
-The `02_run_taxonomizr_lca.sh` script takes the output from `blast_out`, and does the following:
+By default the `02_run_taxonomizr_lca.sh` script takes the output from the `blast_out` directory and does the following:
 <br></br>
 
 1. If blast was run in array mode, chunks are concatenated (automatically detected) to produce an `all_blast.out.tab` file.
-2. Blast results are filtered according to user specified parameters.
-3. The sensitivity of the LCA algorithm is adjusted with the top percent argument.
-4. The output is saved as a taxon path file and emailed to the user.
+2. Blast results are filtered according to user specified parameters, creating intermediate file `filtered_blast.out.tab`.
+3. The LCA algorithm is run, and adjusted using the top percent parameter.
+4. The output is saved as a taxon path file `taxonomizr_taxon_path.tsv` file and emailed to the user.
 <br></br>
 
 <b>To run the `02_run_taxonomizr_lca.sh` script you must provide:</b>
@@ -247,11 +247,9 @@ If you wish to exclude 'uncultured eukaryote' hits, and those with alignment len
 sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -L 75 -T 2 -G 'uncultured eukaryote' -E user@university.ac.uk
 ```
 <br></br>
-If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database is available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql` and will be used by default. You can also generate your own database in R. For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr).
+If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database is available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql` and will be used by default. You can also generate your own database in R and provide the path with `-B`. For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr).
 
-As input, either `all_blast.out.tab` or `chunk0.fa_blast.out.tab` must be present, and are assumed to be in the `blast_out` directory. An alternative directory can be provided, but it must contain one of the aforementioned files.
-
-Filtration of blast hits produces an intermediate `filtered_blast.out.tab` file, and once taxonomizr has run, a final `taxonomizr_taxon_path.tsv` file, featuring assignments at taxonomic levels down to the lowest common ancestor.
+It is possible to specify a different directory than `blast_out` using `-O`, but it must contain either `all_blast.out.tab` or `chunk0.fa_blast.out.tab`.
 <br></br>
 
 <font size="4"><b>4.2) Filtering blast results in 02_run_taxonomizr_lca.sh </b></font>
