@@ -242,22 +242,22 @@ If running the analysis on BESSEMER, an up-to-date version of the taxonomizr dat
 
 As input, either `all_blast.out.tab` or `chunk0.fa_blast.out.tab` must be present, and are assumed to be in the `blast_out` directory. An alternative directory name can be provided, but it must still contain either `all_blast.out.tab` or `chunk0.fa_blast.out.tab`.
 
-Filtration of blast results produces an intermediate file called `filtered_blast.out.tab`, and once taxonomizr has been run, a final output file called `taxonomizr_taxon_path.tsv` is produced. 
+Filtration of blast results produces an intermediate file called `filtered_blast.out.tab`, and once taxonomizr has been run, a final output file called `taxonomizr_taxon_path.tsv`. 
 <br></br>
 
-<font size="4"><b>4.2) Mandatory and optional filters in 02_run_taxonomizr_lca.sh </b></font>
+<font size="4"><b>4.2) Filtering blast results in 02_run_taxonomizr_lca.sh </b></font>
 <br><br>
 
 Blast will potentially output hundred of hits for each ASV. Various filters can be used to exclude low quality or unwanted hits.
 <br></br>
 
-Mandatory filter: (-P) The minimum percentage of identical postions (-P) threshold. Blast hits with low values are probably not accurate assignments. We suggest using a high value (97). Lower numbers (e.g. 95 or 90) might be required if many NAs appear in the summary file, but using a lower threshold will reduce the confidence in lower rank (e.g. species level) assignments.
+Mandatory: (-P) The minimum percentage of identical postions (-P). Blast hits with low values are probably not accurate assignments. We suggest using a high value (97). Lower numbers (e.g. 95 or 90) might be required if many NAs appear in the summary file, but using a lower threshold will reduce the confidence in lower rank (e.g. species level) assignments.
 <br></br>
 
-Optional filter: (-L) The minimum length of alignment (-L) threshold. We would expect accurate blast hits to align across most or all of the length of the ASV. We suggest using a value (in bp) equivalent to 70-80% of the expected ASV length. Thus if your ASVs are approximately 200 bp long, you may want to set -L to 150.
+Optional: (-L) The minimum length of alignment (-L). We would expect accurate blast hits to align across most of the length of the ASV. We suggest using a value (in bp) equivalent to 70-80% of the expected ASV length. Thus if your ASVs are approximately 200 bp long, you may want to set -L to 150.
 <br></br>
 
-Optional: Taxonomic assignment may be improved by removing certain blast hits (e.g. uncultured organisms which often lack taxonomic information). This filter will only work if blast was run with the files 'taxdb.btd' and 'taxdb.bti' present, which provide the additional information required for the search to work. Exclusion is carried out with the [grep -v](https://www.gnu.org/software/grep/manual/grep.html) command, so more complex search terms can be built if required e.g. `-G 'uncultured eukaryote\|environmental'` will exclude blast hits that feature either search term.
+Optional: (-G) Taxonomic assignment may be improved by removing certain blast hits (e.g. uncultured organisms which often lack taxonomic information). This filter will only work if blast was run with the files 'taxdb.btd' and 'taxdb.bti' present. Exclusion is carried out with the [grep -v](https://www.gnu.org/software/grep/manual/grep.html) command, so more complex search terms can be built if required e.g. `-G 'uncultured eukaryote\|environmental'` will exclude blast hits that feature either search term.
 <br></br>
 
 <font size="4"><b>4.3) The Top Percent parameter </b></font>
@@ -266,7 +266,7 @@ Optional: Taxonomic assignment may be improved by removing certain blast hits (e
 It is also mandatory to include a 'Top Percent' value (-T), which is incorporated when the LCA is calculated. This filter removes any blast hits where the [bit score](https://www.metagenomics.wiki/tools/blast/evalue) is less than *100 minus T%* of the highest scoring blast hit. 
 <br></br>
 
-Values of 1-10 are most appropriate for Top Percent. Low values (1.5, 2) will retain fewer blast hits and probably result in more specific taxonomic assignment. However if the ASVs derive from organisms with poor representation in the reference database then higher Top Percent values (e.g. 5-10) may be appropriate. The idea for the Top Percent is taken from MEGAN: for more information see the [MEGAN manual](https://software-ab.cs.uni-tuebingen.de/download/megan6/manual.pdf).
+Values of 1-10 are most appropriate for Top Percent. Low values (1.5, 2) will retain fewer blast hits and result in more specific taxonomic assignment. However if the ASVs derive from organisms with poor representation in the reference database, then higher Top Percent values (e.g. 5-10) may be appropriate. The idea for Top Percent is taken from MEGAN: for more information see the [MEGAN manual](https://software-ab.cs.uni-tuebingen.de/download/megan6/manual.pdf).
 <br></br>
 
 <font size="4"><b>4.4) Running the 02_run_taxonomizr_lca.sh script </b></font>
