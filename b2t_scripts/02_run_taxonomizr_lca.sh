@@ -11,78 +11,147 @@
 #SBATCH --mem=4GB
 #SBATCH --time=24:00:00
 
-USAGE="
+## load profile and environment
+source ~/.bash_profile
+mamba activate /usr/local/extras/Genomics/apps/mambaforge/envs/taxonomizr
+
+function usage {
+    echo "
 ###############################################
 ## Using the 02_run_taxonomizr_lca.sh script ##
 ###############################################
-\n02_run_taxonomizr_lca.sh -P [blast percent ID value 0-100] -T [top percent value 1-10] -G [optional: 'search term' to exclude] -B [full path to accessionTaxa.sql file] -E [email address] \n
-The script takes the output from blast (script 01 or script 01A and 01B) which are assumed to be in the directory blast_out, and applies the 
-following steps: \n
-Step 1:   Merge results if blast was run in array mode (automatically detected).
-Step 1.5: Optionally remove blast hits containing a search term (e.g. 'uncultured')
-Step 2:   Filter blast results by percentage ID (0-100). The user provides a minimum percentage ID (-P) for 
-          filtering blast results. We recommend 85-95.
-Step 3:   The user can further adjust the sensitivity of the LCA algorithm by providing a top percent value
-          (-T) between 1 and 10 (decimals permitted). 
-Step 4:   Run the taxonomizr lca (lowest common ancestor) algorithm; this requires the user to provide the 
-          full path to the accessionTaxa.sql database (-B). The output of taxonomizr will be saved to 
-          blast_out and also sent to the user's email address (-E).\n
-Here is an example of how you might run the script on Bessemer:\n
-sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 95 -T 2 -G 'uncultured' -B /shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql -E user@university.ac.uk \n\n\n"
 
-## load profile and environment
-source ~/.bash_profile
-conda activate /usr/local/extras/Genomics/apps/mambaforge/envs/taxonomizr
+Usage: $0 -P [blast percent ID] -T [top percent] -G ['search term' to exclude] -L [minimumn alignment length] -B [absolute path to accessionTaxa.sql] -O [input/out pirectory for blast results] -E [email address]
+"
+    echo "This script merges results if blast was run in array mode (automatically detected), then applies various filters (-P is mandatory; -G and -L are optional), before running the taxonomizr algorithm (a value of -T must be provided). The absolute path to the database (-B), and input/output directory (-O) can be provided as optional arguments (see below for defaults). Results are emailed to the user (-E).
+    "
+    echo "  -P Filter blast results by minimum percentage ID between (0-100). We recommend 97."
+    echo "  -G (optional) Remove blast hits containing a search term e.g. 'uncultured', or 'uncultured\|environmental'."
+    echo "  -L (optional) Filter results by a minimum blast alignment length. We recommend circa. 75% of the expected amplicon length."
+    echo "  -T Top percent value for the taxonomizr LCA algorithm (1-10). We recommend 2 (decimals permitted)."
+    echo "  -B (optional) Absolute path to accessionTaxa.sql database. Defaults to '/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql'."
+    echo "  -O (optional) Relative path to blast results. Intermediate and final output will also be written here. Defaults to 'blast_out'."
+    echo "  -E User email address.
+    "
+    echo "Here is an example of how you might run the script on Bessemer for a 200 bp expected amplicon, assuming default database and in/out paths:
+    "
+    echo "sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -G 'uncultured' -L 150 -T 2 -E user@university.ac.uk
+    "
+    exit 1
+}
 
 ## parse arguments
-while getopts E:B:P:T:G: flag
+while getopts E:B:O:P:T:G:L: flag
 do
-	case "${flag}" in
-		E) email=${OPTARG};;
-		B) database=${OPTARG};;
-		P) BPI=${OPTARG};;
-		T) topperc=${OPTARG};;
-		G) grep=${OPTARG};;
-	esac
+    case "${flag}" in
+        E) email=${OPTARG};;
+        B) database=${OPTARG};;
+        O) customdir=${OPTARG};;
+        P) BPI=${OPTARG};;
+        T) topperc=${OPTARG};;
+        G) grep=${OPTARG};;
+        L) minlen=${OPTARG};;
+    esac
 done
 
 ## Check mandatory arguments
 shift $((OPTIND-1))
-if  [ -z "${email}" ] || [ -z "${database}" ] || [ -z "${BPI}" ] || [ -z "${topperc}" ]; then
-   printf "${USAGE}" >&2; exit 1
+if [ -z "${email}" ] || [ -z "${BPI}" ] || [ -z "${topperc}" ]; 
+then
+    echo "Some or all of the mandatory parameters are empty";
+    usage
 fi
 
-echo "blast percent identity value = " ${BPI}
-echo "taxonomizr lca top percent value = "${topperc}
-
-## Define path variables
-MAIN_DIR=$PWD
-OUT_DIR="blast_out"
-
-## Step 1 : Check if run in array mode and, if so, merge the chunks to create all_blast.out.tab
-if [ -f "${MAIN_DIR}/${OUT_DIR}/chunk0.fa_blast.out.tab" ]; then
-  echo "Blast was run in array mode, merging chunks..."
-  cat ${MAIN_DIR}/${OUT_DIR}/chunk* > ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab
-fi
-
-## Step 1.5 optionally remove blast hits containing a search term (e.g. 'uncultured')
+## Echo filter parameters
+echo "TAXONOMIZR PARAMETERS SET:
+"
 if [ "$grep" ];
 then
-mv ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab ${MAIN_DIR}/${OUT_DIR}/all_blast.out.nogrepv.tab
-grep -v ${grep} ${MAIN_DIR}/${OUT_DIR}/all_blast.out.nogrepv.tab > ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab;
+    echo "  -G: excluding results containing the string: " ${grep}
 fi
 
+if [ "$minlen" ];
+then
+    echo "  -L: blast minimum alignment length = " ${minlen}
+fi
 
-## Step 2: Remove additional taxa information and filter by user specified blast percentage identity (BPI)
-cut -f1-12 ${MAIN_DIR}/${OUT_DIR}/all_blast.out.tab | awk -v var="${BPI}" '$3 >= var' > ${MAIN_DIR}/${OUT_DIR}/filtered_blast.out.tab
+echo "  -P: blast percent identity value = " ${BPI}
+echo "  -T: taxonomizr lca top percent value = "${topperc}
 
-## Make a symlink for the most recent version of the accessionTaxa.sql database for taxonomizr to use:
-ln -s ${database} accessionTaxa.sql
+## Define path variables
+## Location of project directory is MAIN_DIR
+MAIN_DIR=$PWD
+## Is blastpath custom or default?
+if [ "$customdir" ];
+then
+    BLASTPATH=${customdir}
+    echo "
+Using custom input/output directory for blast results:" ${BLASTPATH}
+else
+    BLASTPATH="blast_out"
+    echo "
+Using default input/output directory for blast results:" ${BLASTPATH}
+fi
+
+## Check if symlink to accessionTaxa.sql exists. If not, make it, and  state whether path is default or custom
+MYLINK=accessionTaxa.sql
+if [ -L ${MYLINK} ] && [ -e ${MYLINK} ]; then
+    echo "Symbolic link to accessionTaxa.sql already exists."
+else
+    echo "Symbolic link to accessionTaxa.sql not found, creating new link."
+    if [ "$database" ];
+    then
+        DB=${database}
+        echo "User has specified custom location of accessionTaxa.sql:" ${DB}
+        ln -s ${DB} ${MYLINK}
+    else
+        DB="/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql"
+        echo "Using default location of accessionTaxa.sql:" ${DB}
+        ln -s ${DB} ${MYLINK}
+    fi
+fi
+
+## Exit if symlink is broken
+if [ ! -e ${MYLINK} ]; then
+   echo "Symbolic link not working, please check path" >&2; exit 1
+else
+   echo "Symbolic link is working"
+fi
+
+## Change to BLASTPATH directory
+cd ${MAIN_DIR}/${BLASTPATH}
+
+## Step 1: Check if run in array mode and, if so, merge the chunks to create all_blast.out.tab
+if [ -f "chunk0.fa_blast.out.tab" ]; 
+then
+    echo "
+Blast was run in array mode, merging chunks...
+"
+    cat chunk* > all_blast.out.tab
+fi
+
+## Apply optional filters (-G and -L) if specified. 
+## Always filter by blast percent identity (-P), and use cut to remove additional taxa information before taxonomizr 
+if [ "$grep" ] && [ ! "$minlen" ] ;
+then
+    grep -v ${grep} all_blast.out.tab | cut -f1-12 | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
+elif [ ! "$grep" ] && [ "$minlen" ] ;
+then
+    cut -f1-12 all_blast.out.tab | awk -v varML="${minlen}" '$4 >= varML' | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
+elif [ "$grep" ] && [ "$minlen" ] ;
+then
+    grep -v ${grep} all_blast.out.tab | cut -f1-12 | awk -v varML="${minlen}" '$4 >= varML' | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
+else
+    cut -f1-12 all_blast.out.tab | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
+fi
 
 ## build up arg string of email and topperc to pass to R script
 ARGS=""
 if [ "$email" ]; then ARGS="$ARGS -E $email"; fi
 if [ "$topperc" ]; then ARGS="$ARGS -T $topperc"; fi
 
+echo "Filtering of blast results complete, proceeding to taxonomizr_lca.R script 
+"
+
 ## Step 3: Run taxonomizr lca by calling Rscript
-Rscript $PWD/b2t_scripts/02_taxonomizr_lca.R $ARGS
+Rscript ${MAIN_DIR}/b2t_scripts/02_taxonomizr_lca.R $ARGS

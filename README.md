@@ -209,6 +209,9 @@ All the rows displayed by head (the top 10) probably show results for the same s
 
 <details><summary><font size="6"><b>4) Run the taxonomizr LCA algorithm</font></b></summary>
 <br></br>
+  
+<font size="4"><b>4.1) Overview of `02_run_taxonomizr_lca.sh` script </b></font>
+<br><br>
 
 For this step we will use [taxonomizr](https://github.com/sherrillmix/taxonomizr), an R package designed to parse NCBI taxonomy files and help with taxonomy assignment. The `condenceTaxa()` function calculates the lowest common ancestor or [LCA](https://en.wikipedia.org/wiki/Lowest_common_ancestor) using multiple blast results.
 <br></br>
@@ -216,51 +219,66 @@ For this step we will use [taxonomizr](https://github.com/sherrillmix/taxonomizr
 The `02_run_taxonomizr_lca.sh` script takes the output from `blast_out`, and does the following:
 <br></br>
 
-1. If blast was run in array mode, chunks are merged (this is automatically detected)
-2. Blast results are filtered by pident (percentage of identical positions: column 3), which is provided by the user
-3. The sensitivity of the LCA algorithm is further adjusted be varying the top percent arguement (see below).
-4. The output is a taxon path file (all the taxonomic levels to the lowest common ancestor), saved to `blast_out` and emailed to the user.
-<br></br>
-
-This script carries out some preparation on the command line and then calls an R script called `02_taxonomizr_lca.R`. It produces an intermediate file `filtered_blast.out.tab` and a final output file called `taxonomizr_taxon_path.tsv`.
+1. If blast was run in array mode, chunks are merged (automatically detected) to produce an `all_blast.out.tab` file.
+2. Blast results are filtered by percentage of identical positions, and optionally, alignment length. Hits containing key terms can also be filtered out optionally.
+3. The sensitivity of the LCA algorithm is adjusted with the top percent arguement (see below).
+4. The output is saved as a taxon path file (all the taxonomic levels to the lowest common ancestor) and emailed to the user.
 <br></br>
 
 <b>To run the `02_run_taxonomizr_lca.sh` script you must provide:</b>
-* Minimum percentage identity (0-100) for the blast results to be considered by taxonomizr (-P)
-* The Top Percent parameter (1-10) for lca calculation (-T)
-* Full path to the taxonomizr accessionTaxa.sql database (-B)
+* Filter: Minimum percentage of identical positions (suggested values: 90-97) for a blast hit to be considered by taxonomizr (-P)
+* The Top Percent parameter (suggested values: 1-10) for LCA calculation (-T)
 * An email address (-E)
 <br></br>
 
-<b>Additionally, one can add an optional argument to exclude hits based on a search term:</b>
-* Search term enclosed within single quotes, e.g. 'uncultured eukaryote' (-G)
+<b>Additionally, one can add several optional arguments:</b>
+* Filter: Minimum length of alignment for a blast hit to be considered by taxonomizr (-L)
+* Filter: Search term for hits to be excluded. This is enclosed within single quotes, e.g. 'uncultured eukaryote' (-G)
+* Absolute path to the taxonomizr accessionTaxa.sql database (-B). See below for default.
+* Relative path of the results directory (-O). Defaults to `blast_out`.
 <br></br>
 
-Taxonomic assignment may be improved by removing some uncultured sequences (which have very little taxonomic information). Note that this will only work if blast was run with the files 'taxdb.btd' and 'taxdb.bti' present, which provide the additional taxonomic information. Exclusion is carried out with the [grep -v](https://www.gnu.org/software/grep/manual/grep.html) command, and more complex search terms can be built if required e.g. `-G 'uncultured eukaryote\|uncultured fungus'` will exclude ASVs if they feature either search term. You may want to run the `02_run_taxonomizr_lca.sh` script without -G and inspect the results of the intermediate output file blast_out/all_blast.out.tab before deciding whether to include -G (and if including it, which search terms would be appropriate).
+If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql` will be used by default. You can also generate your own database using R (note that the file is rather large). For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr).
+
+The script expects to find either `all_blast.out.tab` or `chunk0.fa_blast.out.tab` (which will be concatenated with other chunk files into `all_blast.out.tab`) in the `blast_out` directory. An alternative directory name can be provided, but it must contain either `all_blast.out.tab` or `chunk0.fa_blast.out.tab` (and other chunk files).
+
+Filtration of blast results produces an intermediate file called `filtered_blast.out.tab`, and once taxonomizr has been run, a final output file called `taxonomizr_taxon_path.tsv` is produced. 
 <br></br>
 
-Blast will potentially output hundred of hits for each ASV. The minimum percentage identity threshold (-P) can be used to reduce the number of hits that are considered by taxonomizr. We suggest using a relatively high value to start with (90 or 95), which can be reduced if high numbers of NAs appear in the summary file.
+<font size="4"><b>4.2) Mandatory and optional filters in `02_run_taxonomizr_lca.sh` </b></font>
+<br><br>
+
+Blast will potentially output hundred of hits for each ASV. Various filters can be used to exclude low quality hits or unwanted hits.
 <br></br>
 
-We also provide a 'Top Percent' value (-T) to further adjust sensitivity. This filter removes any blast hits where the [bit score](https://www.metagenomics.wiki/tools/blast/evalue) is less than *100 minus T%* of the highest scoring blast hit. 
+Mandatory: The minimum percentage of identical postions (-P) threshold is used to reduce the number of hits that are considered by taxonomizr. We suggest using a high value (97). This can be reduced (as low as 95 or even 90) if high numbers of NAs appear in the summary file, but using a lower threshold will reduce the confidence in lower rank (e.g. species level) assignments.
 <br></br>
 
-Top Percent can be set to anything from 0 to 100, but values of 1-10 are most appropriate. Setting Top Percent to a low value (1.5, 2) will retain fewer blast hits and probably result in better taxonomic assignment. However if the ASVs derive from organisms with poor representation in the reference database then it may be better to set Top Percent higher (5-10). The idea for the Top Percent filter is taken from MEGAN: for more information see the [MEGAN manual](https://software-ab.cs.uni-tuebingen.de/download/megan6/manual.pdf).
+Optional: The minimum length of alignment (-L) threshold excludes hits that only align for a short length of the ASV (ideally a blast hit will align across the entire length of the ASV). We suggest using a value (in bp) equivalent to 70-80% of the expected ASV length. Thus if your ASVs are approximately 200 bp long, you may want to set -L to 150.
 <br></br>
 
-If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database should be available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql`. You can also generate your own version using R (note that the file is rather large). For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr). For deciding which values of -P and -T to use, we recommend initially using relatively strict (high) values for both, such as:
-* -P 95
-* -T 2
+Optional: Taxonomic assignment may be improved by removing certain blast hits (e.g. uncultured organisms which often lack taxonomic information). This filter will only work if blast was run with the files 'taxdb.btd' and 'taxdb.bti' present, which provide the additional information required for the search to work. Exclusion is carried out with the [grep -v](https://www.gnu.org/software/grep/manual/grep.html) command, and more complex search terms can be built if required e.g. `-G 'uncultured eukaryote\|environmental'` will exclude blast hits that feature either search term.
 <br></br>
 
-Thus you might run the job like so:
+<font size="4"><b>4.3) The Top Percent parameter </b></font>
+<br><br>
 
+It is also mandatory to include a 'Top Percent' value (-T), which is incorporated when the LCA is calculated. This filter removes any blast hits where the [bit score](https://www.metagenomics.wiki/tools/blast/evalue) is less than *100 minus T%* of the highest scoring blast hit. 
+<br></br>
+
+Top Percent can be set to anything from 1 to 99, but values of 1-10 are most appropriate. Setting Top Percent to a low value (1.5, 2) will retain fewer blast hits and probably result in better taxonomic assignment. However if the ASVs derive from organisms with poor representation in the reference database then it may be better to set Top Percent higher (e.g. 5-10). The idea for the Top Percent filter is taken from MEGAN: for more information see the [MEGAN manual](https://software-ab.cs.uni-tuebingen.de/download/megan6/manual.pdf).
+<br></br>
+
+<font size="4"><b>4.4) Running the `02_run_taxonomizr_lca.sh` script </b></font>
+<br><br>
+
+Using default arguments and suggested parameter values you might run the job like so:
 ```
-sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 95 -T 2 -B /shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql -E user@university.ac.uk
+sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -T 2 -E user@university.ac.uk
 ```
-If you wish to exclude hits containing 'uncultured eukaryote' in their name you would include the optional -G argument:
+If you wish to exclude 'uncultured eukaryote' hits, and those which are less than 75% of your expected ASV size of 100 bp (i.e. 75 bp) you might run the job like so:
 ```
-sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 95 -T 2 -G 'uncultured eukaryote' -B /shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql -E user@university.ac.uk
+sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -L 75 -T 2 -G 'uncultured eukaryote' -E user@university.ac.uk
 ```
 </details>
 <br>
