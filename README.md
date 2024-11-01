@@ -219,10 +219,10 @@ For this step we will use [taxonomizr](https://github.com/sherrillmix/taxonomizr
 By default the `02_run_taxonomizr_lca.sh` script takes the output from the `blast_out` directory and does the following:
 <br></br>
 
-1. If blast was run in array mode, chunks are concatenated (automatically detected) to produce an `all_blast.out.tab` file.
-2. Blast results are filtered according to user specified parameters, creating intermediate file `filtered_blast.out.tab`.
+1. If blast was run in array mode, chunks are concatenated to produce an `all_blast.out.tab` file.
+2. Blast results are filtered according to user specified parameters and saved as `filtered_blast.out.tab`.
 3. The LCA algorithm is run, and adjusted using the top percent parameter.
-4. The output is saved as a taxon path file `taxonomizr_taxon_path.tsv` file and emailed to the user.
+4. The output is saved as a taxon path file `taxonomizr_taxon_path.tsv` and emailed to the user.
 <br></br>
 
 <b>To run the `02_run_taxonomizr_lca.sh` script you must provide:</b>
