@@ -246,12 +246,13 @@ If you wish to exclude 'uncultured eukaryote' hits, and those with alignment len
 ```
 sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -L 75 -T 2 -G 'uncultured eukaryote' -E user@university.ac.uk
 ```
+<br></br>
 
 If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database is available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql` and will be used by default. You can also generate your own database in R. For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr).
 
 As input, either `all_blast.out.tab` or `chunk0.fa_blast.out.tab` must be present, and are assumed to be in the `blast_out` directory. An alternative directory can be provided, but it must contain one of the aforementioned files.
 
-Filtration of blast results produces an intermediate `filtered_blast.out.tab` file, and once taxonomizr has run, a final `taxonomizr_taxon_path.tsv` file, featuring assignments at each taxonomic level down to the lowest common ancestor.
+Filtration of blast hits produces an intermediate `filtered_blast.out.tab` file, and once taxonomizr has run, a final `taxonomizr_taxon_path.tsv` file, featuring assignments at taxonomic levels down to the lowest common ancestor.
 <br></br>
 
 <font size="4"><b>4.2) Filtering blast results in 02_run_taxonomizr_lca.sh </b></font>
