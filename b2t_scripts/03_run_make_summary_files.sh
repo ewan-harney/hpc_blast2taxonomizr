@@ -41,9 +41,9 @@ sbatch b2t_scripts/03_run_make_summary_files.sh -E user@university.ac.uk \n\n\n"
 
 ## parse arguments
 while getopts E: flag; do
-	case "${flag}" in
-		E) email=${OPTARG};;
-	esac
+    case "${flag}" in
+        E) email=${OPTARG};;
+    esac
 done
 
 ## Check mandatory arguments
