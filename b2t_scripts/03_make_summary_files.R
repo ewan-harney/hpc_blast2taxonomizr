@@ -1,6 +1,16 @@
 #load msa and phangorn libraries
 library(msa)
 library(phangorn)
+library(optparse)
+
+# parse command line options
+option_list = list(
+  make_option(c("-E", "--email"), type="character", default=NULL,
+              help="Provide an email address to receive an email notification when the job has finished.", metavar="character"))
+
+# Parse arguments
+opt_parser = OptionParser(option_list=option_list)
+opt = parse_args(opt_parser)
 
 # get path
 path<-getwd()
@@ -48,12 +58,7 @@ mi_tab_final  <- mi_tab_final [order(mi_tab_final$asv_number),]
 ## 7). Save the file, removing asv_number
 write.table(mi_tab_final[,-c(12)], "working_data/ASV_taxa_seq_counts.tsv", sep = "\t", quote=F, col.names=T, row.names = F)
 
-## 8). Email user
-email_plot_command <- paste("echo \"DADA2 and Taxonomizr results have been merged.\" | mail -s \"Full summary table\" -a working_data/ASV_taxa_seq_counts.tsv", opt$email, sep=" ")
-system(email_plot_command)
-
-
-## 9). Prepare phyloseq files
+## 8). Prepare phyloseq files
 ##  a. taxmat
 row.names(taxpath) <- taxpath$V1
 taxmat <- taxpath[,c(2:8)]
@@ -78,3 +83,7 @@ fit = pml(treeNJ, data=phang.align)
 fitGTR <- update(fit, k=4, inv=0.2)
 fitGTR <- optim.pml(fitGTR, model="GTR", optInv=TRUE, optGamma=TRUE, rearrangement = "stochastic", control = pml.control(trace = 0))
 saveRDS(fitGTR$tree, file = "working_data/ps_phylogeny.rds")
+
+## 9). Email user
+email_plot_command <- paste("echo \"DADA2 and Taxonomizr results have been merged. Summary table is attached. Phyloseq results are available to download from your space on the HPC.\" | mail -s \"Full summary table\" -a working_data/ASV_taxa_seq_counts.tsv", opt$email, sep=" ")
+system(email_plot_command)
