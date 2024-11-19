@@ -13,7 +13,7 @@
 
 ## load profile and environment
 source ~/.bash_profile
-mamba activate /usr/local/extras/Genomics/apps/mambaforge/envs/taxonomizr
+conda activate /usr/local/extras/Genomics/apps/mambaforge/envs/taxonomizr
 
 function usage {
     echo "
@@ -134,13 +134,13 @@ fi
 ## Always filter by blast percent identity (-P), and use cut to remove additional taxa information before taxonomizr 
 if [ "$grep" ] && [ ! "$minlen" ] ;
 then
-    grep -v ${grep} all_blast.out.tab | cut -f1-12 | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
+    grep -v "${grep}" all_blast.out.tab | cut -f1-12 | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
 elif [ ! "$grep" ] && [ "$minlen" ] ;
 then
     cut -f1-12 all_blast.out.tab | awk -v varML="${minlen}" '$4 >= varML' | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
 elif [ "$grep" ] && [ "$minlen" ] ;
 then
-    grep -v ${grep} all_blast.out.tab | cut -f1-12 | awk -v varML="${minlen}" '$4 >= varML' | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
+    grep -v "${grep}" all_blast.out.tab | cut -f1-12 | awk -v varML="${minlen}" '$4 >= varML' | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
 else
     cut -f1-12 all_blast.out.tab | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
 fi
