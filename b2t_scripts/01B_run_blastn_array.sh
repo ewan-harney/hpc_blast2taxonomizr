@@ -57,4 +57,4 @@ DATA=$(sed "${SLURM_ARRAY_TASK_ID}q;d" <(cat ${PREP_DIR}/${PREP_DIR}_list_of_${N
 FASTA=$(echo "$DATA" | cut -f1 )
 
 ## run blast 
-blastn -query ${MAIN_DIR}/${PREP_DIR}/${FASTA} -task blastn -db ${DATABASE} -out ${MAIN_DIR}/${OUT_DIR}/${FASTA}_blast.out.tab -num_threads 4 -outfmt "6 qseqid saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore staxid ssciname scomnames sblastname sskingdoms stitle"
+blastn -query ${MAIN_DIR}/${PREP_DIR}/${FASTA} -task blastn -db ${DATABASE} -out ${MAIN_DIR}/${OUT_DIR}/${FASTA}_blast.out.tab -num_threads 4 -outfmt "6 qseqid saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen staxid ssciname scomnames sblastname sskingdoms stitle"

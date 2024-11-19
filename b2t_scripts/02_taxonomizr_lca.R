@@ -20,7 +20,7 @@ path<-getwd()
 # Read in the filtered_blast.out.tab file
 blastResults<-read.table(file = paste(path, "/filtered_blast.out.tab", sep=""),header=FALSE,stringsAsFactors=FALSE)
 
-# Filter file by (user-supplied) top percent value
+# Filter file by (user-supplied) top percent value of bit score
 # Note that the top percent value is converted to a fraction and subtracted from 1:
 # thus a top percent value of 2 becomes 0.98 
 topPercent <- data.frame(blastResults %>% group_by(V1) %>% 

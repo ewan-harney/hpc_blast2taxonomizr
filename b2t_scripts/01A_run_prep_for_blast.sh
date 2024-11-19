@@ -25,7 +25,7 @@ The script assumes you have a relatively large number of ASVs to identify (more 
 It makes a directory called split_fasta and saves fasta chunks here. It also creates a list of the files (required for step 01B), as well as
 symbolic links to ncbi taxa databases (required for script 01B), and a blast_logs directory (where output from script 01B will be saved).
 Here is an example of how you might run the script on Bessemer:\n
-sbatch b2t_scripts/01A_run_prep_for_blast.sh -F working_data/06_ASV_seqs.fasta\n\n\n"
+sbatch b2t_scripts/01A_run_prep_for_blast.sh -F working_data/06_ASV_seqs.fasta\n\n"
 
 ## List arguments
 while getopts F: flag; do

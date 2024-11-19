@@ -232,7 +232,7 @@ By default the `02_run_taxonomizr_lca.sh` script takes the output from the `blas
 <br></br>
 
 <b>Additionally, one can add several optional arguments:</b>
-* (-L) Filter by minimum length of alignment 
+* (-L) Filter by minimum length of alignment expressed as a percentage of the ASV length (suggested values: 70-80)
 * (-G) Filter to exclude hits based on search terms enclosed within single quotes, e.g. 'uncultured eukaryote'
 * (-B) Absolute path to the taxonomizr accessionTaxa.sql database
 * (-O) Relative path of the results directory
@@ -242,9 +242,9 @@ Using default arguments and suggested parameter values you might run the job lik
 ```
 sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -T 2 -E user@university.ac.uk
 ```
-If you wish to exclude 'uncultured eukaryote' hits, and those with alignment length less than 75 bp:
+If you wish to exclude 'uncultured eukaryote' hits, and those with alignment lengths less than 70% of the ASV length:
 ```
-sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -L 75 -T 2 -G 'uncultured eukaryote' -E user@university.ac.uk
+sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -L 70 -T 2 -G 'uncultured eukaryote' -E user@university.ac.uk
 ```
   
 If running the analysis on BESSEMER, an up-to-date version of the taxonomizr database is available at `/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql` and will be used by default. You can also generate your own database in R and provide the path with `-B`. For more details please refer to [taxonomizr](https://github.com/sherrillmix/taxonomizr).
@@ -260,7 +260,7 @@ Blast will potentially output hundred of hits for each ASV. Various filters can 
 
 * Mandatory: (-P) The minimum percentage of identical postions (-P). Blast hits with low values are probably not accurate assignments. We suggest using a high value (97). Lower numbers (e.g. 95 or 90) might be required if many NAs appear in the summary file, but using a lower threshold will reduce the confidence in lower rank (e.g. species level) assignments.
 <br></br>
-* Optional: (-L) The minimum length of alignment (-L). We would expect accurate blast hits to align across most of the length of the ASV. We suggest using a value (in bp) equivalent to 70-80% of the expected ASV length. Thus if your ASVs are approximately 200 bp long, you may want to set -L to 150.
+* Optional: (-L) The minimum length of alignment (-L), as a percentage of the ASV length. We would expect accurate blast hits to align across most of the length of the ASV. We suggest using a value of around 70. Higher values may allow more accurate taxonomic assignment at the expense of more 'NA' assignments.
 <br></br>
 * Optional: (-G) Taxonomic assignment may be improved by removing certain blast hits (e.g. uncultured organisms which often lack taxonomic information). This filter will only work if blast was run with the files 'taxdb.btd' and 'taxdb.bti' present. Exclusion is carried out with the [grep -v](https://www.gnu.org/software/grep/manual/grep.html) command, so more complex search terms can be built if required e.g. `-G 'uncultured eukaryote\|environmental'` will exclude blast hits that feature either search term.
 <br></br>

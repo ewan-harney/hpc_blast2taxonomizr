@@ -25,9 +25,9 @@ Usage: $0 -P [blast percent ID] -T [top percent] -G ['search term' to exclude] -
 "
     echo "This script merges results if blast was run in array mode (automatically detected), then applies various filters (-P is mandatory; -G and -L are optional), before running the taxonomizr algorithm (a value of -T must be provided). The absolute path to the database (-B), and input/output directory (-O) can be provided as optional arguments (see below for defaults). Results are emailed to the user (-E).
     "
-    echo "  -P Filter blast results by minimum percentage ID between (0-100). We recommend 97."
+    echo "  -P Filter blast results by minimum percentage identity from 0-100. We recommend 97."
     echo "  -G (optional) Remove blast hits containing a search term e.g. 'uncultured', or 'uncultured\|environmental'."
-    echo "  -L (optional) Filter results by a minimum blast alignment length. We recommend circa. 75% of the expected amplicon length."
+    echo "  -L (optional) Filter results by a minimum alignment length (expressed as a percentage of ASV length) from 0-100. We recommend 75."
     echo "  -T Top percent value for the taxonomizr LCA algorithm (1-10). We recommend 2 (decimals permitted)."
     echo "  -B (optional) Absolute path to accessionTaxa.sql database. Defaults to '/shared/genomicsdb2/shared/r_taxonomizr/current/accessionTaxa.sql'."
     echo "  -O (optional) Relative path to blast results. Intermediate and final output will also be written here. Defaults to 'blast_out'."
@@ -72,11 +72,11 @@ fi
 
 if [ "$minlen" ];
 then
-    echo "  -L: blast minimum alignment length = " ${minlen}
+    echo "  -L: blast minimum alignment length percentage: " ${minlen}
 fi
 
-echo "  -P: blast percent identity value = " ${BPI}
-echo "  -T: taxonomizr lca top percent value = "${topperc}
+echo "  -P: blast percent identity value: " ${BPI}
+echo "  -T: taxonomizr lca top percent value: "${topperc}
 
 ## Define path variables
 ## Location of project directory is MAIN_DIR
@@ -137,10 +137,10 @@ then
     grep -v "${grep}" all_blast.out.tab | cut -f1-12 | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
 elif [ ! "$grep" ] && [ "$minlen" ] ;
 then
-    cut -f1-12 all_blast.out.tab | awk -v varML="${minlen}" '$4 >= varML' | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
+    awk -F "\t" '{print $0 "\t" $4/$13*100}' all_blast.out.tab | awk -F "\t" -v varML="${minlen}" '$20 >= varML' | cut -f1-12 | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
 elif [ "$grep" ] && [ "$minlen" ] ;
 then
-    grep -v "${grep}" all_blast.out.tab | cut -f1-12 | awk -v varML="${minlen}" '$4 >= varML' | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
+    grep -v "${grep}" all_blast.out.tab | awk -F "\t" '{print $0 "\t" $4/$13*100}' | awk -F "\t" -v varML="${minlen}" '$20 >= varML' | cut -f1-12 | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
 else
     cut -f1-12 all_blast.out.tab | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
 fi
