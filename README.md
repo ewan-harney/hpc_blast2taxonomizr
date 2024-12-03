@@ -151,7 +151,7 @@ The `01B_run_blastn_array.sh` script will then use an array to simultaneously bl
 * the number of input files to be run on the array (-N)
 <br></br>
 
-As stated in section 3.2, it is most likely that you will use the ncbi database nt. The number -N is contained in the file name of `split_fasta_list_of_X.txt` (in place of the 'X'). This can be viewed with the following command:
+As stated in section 3.2, it is most likely that you will use the ncbi database nt. The number -N is contained in the file name of `split_fasta_list_of_N.txt` (in place of the 'N'). This can be viewed with the following command:
   
 ```
 ls split_fasta/split_fasta*
@@ -160,16 +160,18 @@ ls split_fasta/split_fasta*
 <b>IMPORTANT!</b> Check carefully the number that appears in this file name! This is the number that <b>MUST</b> be used when running `01B_run_blastn_array.sh`. For example, if our original sequence.fasta file had contained 2350 sequences, it would have been split into 24 chunks, with the txt file named `split_fasta_list_of_24.txt`. The number (in this example <b>24</b>) should appear twice when we submit this job; as the array limit (following `sbatch --array=1-` ) and as the value of `-N`. For example:
   
 ```
-sbatch --array=1-24 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 24
+sbatch --array=1-24%10 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 24
 ```
   
 <b>On the other hand</b> if our original sequence.fasta file had only contained 1780 sequences, it would have been split into 18 chunks, with the txt file named `split_fasta_list_of_18.txt`. In this case our `array` and `-N` value would be set to <b>18</b> and we would run the script like so:
   
 ```
-sbatch --array=1-18 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 18
+sbatch --array=1-18%10 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 18
 ```
   
-Note that error and output log files for each subjob of the array will be written to the directory `blast_logs`.
+Another aspect of arrays to notice is the array 'throttle', indicated by the `%10` after `--array=1-24` or `--array=1-18`. The throttle is the number of jobs that will be allowed to run simulataneously. It can take any numeric value but we suggest using 10; using a higher number can impact other users' ability to submit and run jobs on the HPC.
+  
+Also note that error and output log files for each subjob of the array will be written to the directory `blast_logs`.
 <br></br>
 
 <font size="4"><b>3.4) Monitoring and assessing the result of blastn</b></font>
