@@ -121,13 +121,20 @@ fi
 ## Change to BLASTPATH directory
 cd ${MAIN_DIR}/${BLASTPATH}
 
-## Step 1: Check if run in array mode and, if so, merge the chunks to create all_blast.out.tab
-if [ -f "chunk0.fa_blast.out.tab" ]; 
+## Step 1: Check if all_blast.out.tab exists. If not, check for chunks and concatenate to create all_blast.out.tab
+if [ -f "all_blast.out.tab"]
 then
     echo "
-Blast was run in array mode, merging chunks...
+File 'all_blast.out.tab' found, proceeding to filtering steps...
+"
+elif [ -f "chunk0.fa_blast.out.tab" ]; 
+then
+    echo "
+Blast was run in array mode, merging chunks and proceeding to filtering steps...
 "
     cat chunk* > all_blast.out.tab
+else
+    echo "Neither 'all_blast.out.tab' nor 'chunk0.fa_blast.out.tab' were found. Please check path or output from blast." >&2; exit 1
 fi
 
 ## Apply optional filters (-G and -L) if specified. 
