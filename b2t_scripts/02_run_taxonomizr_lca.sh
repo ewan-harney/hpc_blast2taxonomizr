@@ -122,12 +122,12 @@ fi
 cd ${MAIN_DIR}/${BLASTPATH}
 
 ## Step 1: Check if all_blast.out.tab exists. If not, check for chunks and concatenate to create all_blast.out.tab
-if [ -f "all_blast.out.tab"]
+if [ -f "all_blast.out.tab"] ;
 then
     echo "
 File 'all_blast.out.tab' found, proceeding to filtering steps...
 "
-elif [ -f "chunk0.fa_blast.out.tab" ]; 
+elif [ -f "chunk0.fa_blast.out.tab" ] && [ ! -f "all_blast.out.tab"] ;
 then
     echo "
 Blast was run in array mode, merging chunks and proceeding to filtering steps...
