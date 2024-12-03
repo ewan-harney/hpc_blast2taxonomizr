@@ -31,7 +31,7 @@ The number (where the * appears) must be entered TWO TIMES: 1) as the array limi
 ###############\n
 Array job submission differs to normal batch job submission. Here is an example of how you might run the script on Bessemer if you have an array 
 size of 24:\n
-sbatch --array=1-24 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 24 \n\n\n"
+sbatch --array=1-24%10 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 24 \n\n\n"
 
 ## List arguments
 while getopts B:N: flag; do
