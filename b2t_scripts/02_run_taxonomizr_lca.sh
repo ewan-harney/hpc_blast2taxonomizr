@@ -63,7 +63,7 @@ then
 fi
 
 ## Echo filter parameters
-echo "TAXONOMIZR PARAMETERS SET:
+echo "Filtering and Taxonomizr parameters:
 "
 if [ "$grep" ];
 then
@@ -78,19 +78,20 @@ fi
 echo "  -P: blast percent identity value: " ${BPI}
 echo "  -T: taxonomizr lca top percent value: "${topperc}
 
-## Define path variables
+## Step 1. Check and define paths
+echo "
+Step 1. Checking input/output directory and link to accessionTaxa.sql
+"
 ## Location of project directory is MAIN_DIR
 MAIN_DIR=$PWD
 ## Is blastpath custom or default?
 if [ "$customdir" ];
 then
     BLASTPATH=${customdir}
-    echo "
-Using custom input/output directory for blast results:" ${BLASTPATH}
+    echo "Using custom input/output directory for blast results:" ${BLASTPATH}
 else
     BLASTPATH="blast_out"
-    echo "
-Using default input/output directory for blast results:" ${BLASTPATH}
+    echo "Using default input/output directory for blast results:" ${BLASTPATH}
 fi
 
 ## Check if symlink to accessionTaxa.sql exists. If not, make it, and  state whether path is default or custom
@@ -113,7 +114,7 @@ fi
 
 ## Exit if symlink is broken
 if [ ! -e ${MYLINK} ]; then
-   echo "Symbolic link not working, please check path" >&2; exit 1
+   echo "ERROR: Symbolic link not working, please check path" >&2; exit 1
 else
    echo "Symbolic link is working"
 fi
@@ -121,24 +122,48 @@ fi
 ## Change to BLASTPATH directory
 cd ${MAIN_DIR}/${BLASTPATH}
 
-## Step 1: Check if all_blast.out.tab exists. If not, check for chunks and concatenate to create all_blast.out.tab
+## Step 2: Check if all_blast.out.tab exists. If not, check for chunks and concatenate to create all_blast.out.tab
+echo "
+Step 2. Checking for the existence of all_blast.out.tab, or concatenating 'chunks'
+"
 if [ -f "all_blast.out.tab" ] ;
 then
-    echo "
-File 'all_blast.out.tab' found, proceeding to filtering steps...
-"
+    echo "File 'all_blast.out.tab' found, proceeding to filtering steps..."
 elif [ -f "chunk0.fa_blast.out.tab" ] && [ ! -f "all_blast.out.tab" ] ;
 then
-    echo "
-Blast was run in array mode, merging chunks and proceeding to filtering steps...
-"
+    echo "Blast was run in array mode, merging chunks and proceeding to filtering steps..."
     cat chunk* > all_blast.out.tab
 else
-    echo "Neither 'all_blast.out.tab' nor 'chunk0.fa_blast.out.tab' were found. Please check path or output from blast." >&2; exit 1
+    echo "ERROR: Neither 'all_blast.out.tab' nor 'chunk0.fa_blast.out.tab' were found. Please check path or output from blast." >&2; exit 1
 fi
 
+## Step 3: Check the format of the accession
+echo "
+Step 3. Checking the format of the ncbi accession (column 2 of 'all_blast.out.tab'), which taxonomizr will use in taxonomic assignment
+"
+if awk '{print $2}' all_blast.out.tab | grep -q ';.*;.*;';
+then
+    #awk -F[\t.] '{print $1 "." $2 "\t" $0}' all_blast.out.tab | cut -f1,2,5- > tmp.tab
+    #mv all_blast.out.tab non_ncbi_acc.out.tab
+    #mv tmp.tab all_blast.out.tab
+    echo "WARNING: Semi colons found in column 2: were ASVs  blasted against a non-ncbi database?
+The file 'all_blast.out.tab' has been reformated, but proceed with caution.
+The original 'all_blast.out.tab' has been renamed 'non_ncbi_acc.out.tab'.
+"
+elif awk '{print $2}' all_blast.out.tab | grep -v ';' | grep -q '[A-Z].*[A-Z0-9]\.[0-9]'
+then
+    echo "Column 2 seems to be a standard ncbi accession, proceeding with next step.
+"
+else
+    echo "ERROR: Column 2 is not in the expected format, please check file." >&2; exit 1
+fi
+
+## Step 4: applying the various filters and preparing the file for taxonomizr
 ## Apply optional filters (-G and -L) if specified. 
-## Always filter by blast percent identity (-P), and use cut to remove additional taxa information before taxonomizr 
+## Always filter by blast percent identity (-P), and use cut to remove additional taxa information before taxonomizr.
+echo "
+Step 4. Applying filters. Note that -P is mandatory, while -L and -M are optional.
+"
 if [ "$grep" ] && [ ! "$minlen" ] ;
 then
     grep -v "${grep}" all_blast.out.tab | cut -f1-12 | awk -v varPI="${BPI}" '$3 >= varPI' > filtered_blast.out.tab
@@ -157,7 +182,7 @@ ARGS=""
 if [ "$email" ]; then ARGS="$ARGS -E $email"; fi
 if [ "$topperc" ]; then ARGS="$ARGS -T $topperc"; fi
 
-echo "Filtering of blast results complete, proceeding to taxonomizr_lca.R script 
+echo "Filtering of blast results complete, proceeding to taxonomizr_lca.R script. 
 "
 
 ## Step 3: Run taxonomizr lca by calling Rscript
