@@ -143,9 +143,9 @@ Step 3. Checking the format of the ncbi accession (column 2 of 'all_blast.out.ta
 "
 if awk '{print $2}' all_blast.out.tab | grep -q ';.*;.*;';
 then
-    #awk -F[\t.] '{print $1 "." $2 "\t" $0}' all_blast.out.tab | cut -f1,2,5- > tmp.tab
-    #mv all_blast.out.tab non_ncbi_acc.out.tab
-    #mv tmp.tab all_blast.out.tab
+    awk -F[\t.] '{print $1 "." $2 "\t" $0}' all_blast.out.tab | cut -f1,2,5- > tmp.tab
+    mv all_blast.out.tab non_ncbi_acc.out.tab
+    mv tmp.tab all_blast.out.tab
     echo "WARNING: Semi colons found in column 2: were ASVs  blasted against a non-ncbi database?
 The file 'all_blast.out.tab' has been reformated, but proceed with caution.
 The original 'all_blast.out.tab' has been renamed 'non_ncbi_acc.out.tab'."
