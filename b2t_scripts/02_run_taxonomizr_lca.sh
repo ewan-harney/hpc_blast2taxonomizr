@@ -35,7 +35,7 @@ Usage: $0 -P [blast percent ID] -T [top percent] -G ['search term' to exclude] -
     "
     echo "Here is an example of how you might run the script on Bessemer for a 200 bp expected amplicon, assuming default database and in/out paths:
     "
-    echo "sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -G 'uncultured' -L 150 -T 2 -E user@university.ac.uk
+    echo "sbatch b2t_scripts/02_run_taxonomizr_lca.sh -P 97 -G 'uncultured' -L 75 -T 2 -E user@university.ac.uk
     "
     exit 1
 }
@@ -148,12 +148,10 @@ then
     #mv tmp.tab all_blast.out.tab
     echo "WARNING: Semi colons found in column 2: were ASVs  blasted against a non-ncbi database?
 The file 'all_blast.out.tab' has been reformated, but proceed with caution.
-The original 'all_blast.out.tab' has been renamed 'non_ncbi_acc.out.tab'.
-"
+The original 'all_blast.out.tab' has been renamed 'non_ncbi_acc.out.tab'."
 elif awk '{print $2}' all_blast.out.tab | grep -v ';' | grep -q '[A-Z].*[A-Z0-9]\.[0-9]'
 then
-    echo "Column 2 seems to be a standard ncbi accession, proceeding with next step.
-"
+    echo "Column 2 seems to be a standard ncbi accession, proceeding with next step."
 else
     echo "ERROR: Column 2 is not in the expected format, please check file." >&2; exit 1
 fi
