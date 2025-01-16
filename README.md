@@ -286,7 +286,7 @@ Values of 1-10 are most appropriate for Top Percent. Low values (1.5, 2) will re
 
 The `taxonomizr_taxon_path.tsv` file produced in the previous step provides us with the taxon path to the LCA of each ASV. However, we may want to create addtional summary files, as well as files formatted for downstream analysis with the community analysis R package [phyloseq](https://joey711.github.io/phyloseq/). The final script of this pipeline, `03_run_make_summary_files.sh`, creates these files. As well as using the `taxonomizr_taxon_path.tsv` file, this step requires the `06_ASV_seqs.fasta` and `06_ASV_counts.tsv` files from the [dada2 pipeline](https://github.com/khmaher/HPC_dada2), which it expects to find in `working_data`.
 
-The only arguement that needs to be provided to run the script is an email address, where the final summary file will be sent. The script can be run as follows:
+The only argument that needs to be provided to run the script is an email address, where the final summary file will be sent. The script can be run as follows:
   
 ```
 sbatch b2t_scripts/03_run_make_summary_files.sh -E user@university.ac.uk
@@ -317,13 +317,43 @@ Reducing -P allows sequences with lower blast percentage identity to be consider
 Reducing -T will make the taxonomizr lca algorithm more stringent, potentially providing more specific taxonomic assignement.
 <br><br>
 
-The remaining files are created in working_data.
+The remaining files are written to working_data:
 * `ASV_taxa_seq_counts.tsv` : complete summary of taxonomic results (lca taxon and taxon path to the lca taxon), sequence, and count results
 * `ps_taxamat.tsv` : ASV taxon paths in phyloseq format
 * `ps_countmat.tsv` : ASV count data in phyloseq format
 * `ps_phylogeny.rds` : phylogenetic tree prepared according to protocol of [Callahan et al. 2016](https://f1000research.com/articles/5-1492/v1), see subsection _Construct the phylogenetic tree_,
 
 Once the script finishes running the user will receive an email with the `ASV_taxa_seq_counts.tsv` file attached. Phyloseq phylogeny construction can take a while (depending on how many sequences are included in the analysis, up to 30 minutes), although the `ASV_taxa_seq_counts.tsv` file can usually be viewed within a couple of minutes of the script running.
+</font>
+<br>
+</details>
+<br>
+
+
+<details><summary><font size="6"><b>6) OPTIONAL: recreate summary files following filtering of ASVs</font></b></summary>
+<br><br>
+  
+<font size="4"><b>6.1) Run the `03b_run_make_filtered_phyloseq_files.sh` script </b></font>
+<br><br>
+
+Sometimes the output of dada2 and blast2taxonomizr will be a very large number of ASVs, including many that are uninformative (e.g. not the target organisms) or have poor taxonomic assignment. Furthermore, when there are many thousands of ASVs, phylogenetic tree creation may take a long time or not work. In this case, it may be wise to remove unwanted ASVs and recreate the phyloseq objects.
+<br><br>
+
+To do this, apply your filters to the `ASV_taxa_seq_counts.tsv` file produced by the previous step, removing rows that are not required. Please be careful not to change other elements of the file (e.g. the underscore between genus and species name or the presences of NAs). Filtration can be carried out on the cluster or on a local machine. Once complete, save the file as `ASV_taxa_seq_counts_filtered.tsv` and ensure that it is located in the working_data directory. You can now run the optional script.
+<br><br>
+
+As with the original make summary file script, the only argument that needs to be provided is an email address, where the three phyloseq files will be sent. The script can be run as follows:
+  
+```
+sbatch b2t_scripts/03_run_make_summary_files.sh -E user@university.ac.uk
+```
+<br><br>
+
+The following files will be written to working_data and emailed to the user:
+* `ps_taxamat_filtered.tsv` : filtered version of ASV taxon paths in phyloseq format
+* `ps_countmat_filtered.tsv` : filtered version of ASV count data in phyloseq format
+* `ps_phylogeny_filtered.rds` : phylogenetic tree using filtered ASVs
+
 </font>
 <br>
 </details>
