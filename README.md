@@ -345,7 +345,7 @@ To do this, apply your filters to the `ASV_taxa_seq_counts.tsv` file produced by
 As with the original make summary file script, the only argument that needs to be provided is an email address, where the three phyloseq files will be sent. The script can be run as follows:
   
 ```
-sbatch b2t_scripts/03_run_make_summary_files.sh -E user@university.ac.uk
+sbatch b2t_scripts/03B_run_make_filtered_phyloseq_files.sh -E user@university.ac.uk
 ```
 <br><br>
 
