@@ -118,7 +118,7 @@ Running `blastn` in simple mode will create a new directory called `blast_out` i
 It is most likely that you will use the nt database, which contains all nucleotide sequences available on GenBank. However, you can also supply a smaller or bespoke indexed database. Here we assume you are using nt. This is an example of how to submit the job on BESSEMER:
   
 ```
-sbatch b2t_scripts/01_run_blastn_simple.sh -F working_data/06_ASV_seqs.fasta -B /shared/genomicsdb2/shared/ncbi_nt/current/nt
+sbatch b2t_scripts/01_run_blastn_simple.sh -F working_data/06_ASV_seqs.fasta -B /shared/genomicsdb2/shared/ncbi_core_nt/current/core_nt
 ```
 
 <font size="4"><b>3.3) Running blastn in array mode</b></font>
@@ -160,13 +160,13 @@ ls split_fasta/split_fasta*
 <b>IMPORTANT!</b> Check carefully the number that appears in this file name! This is the number that <b>MUST</b> be used when running `01B_run_blastn_array.sh`. For example, if our original sequence.fasta file had contained 2350 sequences, it would have been split into 24 chunks, with the txt file named `split_fasta_list_of_24.txt`. The number (in this example <b>24</b>) should appear twice when we submit this job; as the array limit (following `sbatch --array=1-` ) and as the value of `-N`. For example:
   
 ```
-sbatch --array=1-24%10 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 24
+sbatch --array=1-24%10 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_core_nt/current/core_nt -N 24
 ```
   
 <b>On the other hand</b> if our original sequence.fasta file had only contained 1780 sequences, it would have been split into 18 chunks, with the txt file named `split_fasta_list_of_18.txt`. In this case our `array` and `-N` value would be set to <b>18</b> and we would run the script like so:
   
 ```
-sbatch --array=1-18%10 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_nt/current/nt -N 18
+sbatch --array=1-18%10 b2t_scripts/01B_run_blastn_array.sh -B /shared/genomicsdb2/shared/ncbi_core_nt/current/core_nt -N 18
 ```
   
 Another aspect of arrays to notice is the array 'throttle', indicated by the `%10` after `--array=1-24` or `--array=1-18`. The throttle is the number of jobs that will be allowed to run simulataneously. It can take any numeric value but we suggest using 10; using a higher number can impact other users' ability to submit and run jobs on the HPC.
