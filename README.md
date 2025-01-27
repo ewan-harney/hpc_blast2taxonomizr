@@ -115,7 +115,7 @@ Running `blastn` in simple mode will create a new directory called `blast_out` i
 * the location of an ncbi database on the HPC (-B)
 <br></br>
 
-It is most likely that you will use the nt database, which contains all nucleotide sequences available on GenBank. However, you can also supply a smaller or bespoke indexed database. Here we assume you are using nt. This is an example of how to submit the job on BESSEMER:
+It is most likely that you will use the core nt database, which is an alternative to the nt database (that contains all nucleotide sequences available on GenBank). The core nt database contains better-defined content and is less than half the size of the nt database; this will speed up your searches and reduce the computational resources needed while returning very similar top results for most searches. However, you can also supply a smaller or bespoke indexed database. Here we assume you are using core nt. This is an example of how to submit the job on BESSEMER:
   
 ```
 sbatch b2t_scripts/01_run_blastn_simple.sh -F working_data/06_ASV_seqs.fasta -B /shared/genomicsdb2/shared/ncbi_core_nt/current/core_nt
@@ -151,7 +151,7 @@ The `01B_run_blastn_array.sh` script will then use an array to simultaneously bl
 * the number of input files to be run on the array (-N)
 <br></br>
 
-As stated in section 3.2, it is most likely that you will use the ncbi database nt. The number -N is contained in the file name of `split_fasta_list_of_N.txt` (in place of the 'N'). This can be viewed with the following command:
+As stated in section 3.2, it is most likely that you will use the ncbi database core nt. The number -N is contained in the file name of `split_fasta_list_of_N.txt` (in place of the 'N'). This can be viewed with the following command:
   
 ```
 ls split_fasta/split_fasta*
@@ -177,7 +177,7 @@ Also note that error and output log files for each subjob of the array will be w
 <font size="4"><b>3.4) Monitoring and assessing the result of blastn</b></font>
 <br></br>
 
-Running `blastn` against the nt database can take a while. To follow the status of the job run the following command: 
+Running `blastn` against the core nt database can take a while. To follow the status of the job run the following command: 
 
 ```
 squeue --me
@@ -204,7 +204,7 @@ qseqid / *saccver* / pident / length / mismatch / gapopen / qstart / qend / ssta
 (italics highlight differences to the default blast tabular output).
 <br></br> 
 
-All the rows displayed by head (the top 10) probably show results for the same sequence (ASV_1 if following the dada2 pipeline) because usually queries match many sequences in the nt database. Sometimes the alignment will be much better for one species than any other, but in other cases the alignments from many sequences will be comparable, and we may need to class the sequence at a higher taxonomic level (e.g. genus or family). To provide a likely taxonomic assignmnet for each ASV we will apply a lowest common ancestor (LCA) algorithm.
+All the rows displayed by head (the top 10) probably show results for the same sequence (ASV_1 if following the dada2 pipeline) because usually queries match many sequences in the core nt database. Sometimes the alignment will be much better for one species than any other, but in other cases the alignments from many sequences will be comparable, and we may need to class the sequence at a higher taxonomic level (e.g. genus or family). To provide a likely taxonomic assignmnet for each ASV we will apply a lowest common ancestor (LCA) algorithm.
 <br>
 </details>
 <br>
